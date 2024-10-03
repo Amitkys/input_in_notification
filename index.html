@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hourly Notification Input App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Hourly Notification Input App</h1>
+    <p>This app will send you hourly notifications. You can input your text, and it will be saved in a text file.</p>
+    <button id="startNotifications">Start Notifications</button>
+
+    <script>
+        // Request Notification permission from the user
+        function requestNotificationPermission() {
+            if (Notification.permission !== 'granted') {
+                Notification.requestPermission().then(permission => {
+                    if (permission !== 'granted') {
+                        alert("Notification permission is required to use this app!");
+                    }
+                });
+            }
+        }
+
+        // Function to send the notification every hour
+        function showNotification() {
+            if (Notification.permission === 'granted') {
+                const notification = new Notification("Hourly Input Required", {
+                    body: "Please provide your input for this hour",
+                });
+
+                // Create an input form when the notification is clicked
+                notification.onclick = () => {
+                    let userInput = prompt("Enter something for this hour:");
+                    if (userInput) {
+                        saveInputToFile(userInput);
+                    }
+                };
+            }
+        }
+
+        // Function to start hourly notifications
+        function startHourlyNotifications() {
+            showNotification();  // First notification right away
+            setInterval(showNotification, 60 * 60 * 1000);  // Repeat every hour (60 minutes * 60 seconds * 1000 milliseconds)
+        }
+
+        // Function to save input to a text file and trigger download
+        function saveInputToFile(userInput) {
+            const date = new Date().toLocaleString();
+            const content = `Input: ${userInput} at ${date}\n`;
+
+            // Create a Blob (file-like object) and trigger download
+            const blob = new Blob([content], { type: "text/plain" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "user_input.txt";
+            link.click();
+        }
+
+        // Event listener for the button to start notifications
+        document.getElementById('startNotifications').addEventListener('click', () => {
+            requestNotificationPermission();
+            startHourlyNotifications();
+        });
+    </script>
+
+</body>
+</html>
